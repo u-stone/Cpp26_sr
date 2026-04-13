@@ -4,7 +4,9 @@
 
 set -e
 
-INSTALL_PREFIX="${1:-$HOME/opt/clang-p2996}"
+# 🛠️ Configuration
+PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+INSTALL_PREFIX="${1:-$PROJECT_ROOT/.toolchain/clang-p2996}"
 BUILD_DIR="/tmp/clang-p2996-build"
 REPO_URL="https://github.com/bloomberg/clang-p2996.git"
 
