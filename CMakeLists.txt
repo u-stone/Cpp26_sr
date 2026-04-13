@@ -37,3 +37,5 @@ add_executable(05_Type_Synthesis src/05_Type_Synthesis/main.cpp)
 add_executable(06_Tuple_Generation src/06_Tuple_Generation/main.cpp)
 
 add_executable(07_JSON_Serializer src/07_JSON_Serializer/main.cpp)
+
+add_executable(08_Command_Line_Parser src/08_Command_Line_Parser/main.cpp)
