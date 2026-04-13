@@ -31,3 +31,5 @@ add_executable(01_Hello_Meta_info src/01_Hello_Meta_info/main.cpp)
 add_executable(03_Reflecting_Structs_Classes src/03_Reflecting_Structs_Classes/main.cpp)
 
 add_executable(04_Attributes_and_Functions src/04_Attributes_and_Functions/main.cpp)
+
+add_executable(05_Type_Synthesis src/05_Type_Synthesis/main.cpp)
