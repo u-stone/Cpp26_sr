@@ -1,0 +1,38 @@
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      }
+    },
+    {
+      "name": "clang-p2996-debug",
+      "displayName": "Clang P2996 Debug",
+      "description": "Configure for Bloomberg Clang P2996 Fork (Debug)",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_CXX_COMPILER": "clang++"
+      }
+    },
+    {
+      "name": "clang-p2996-release",
+      "displayName": "Clang P2996 Release",
+      "description": "Configure for Bloomberg Clang P2996 Fork (Release)",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_CXX_COMPILER": "clang++"
+      }
+    }
+  ],
+  "buildPresets": [
+    { "name": "clang-p2996-debug",    "configurePreset": "clang-p2996-debug" },
+    { "name": "clang-p2996-release",  "configurePreset": "clang-p2996-release" }
+  ]
+}
