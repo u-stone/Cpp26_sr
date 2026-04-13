@@ -13,13 +13,14 @@ Since C++26 Reflection is not yet in mainline compilers, you MUST use a speciali
 - **Ninja**: Recommended generator
 
 ### 2. Environment Setup
-Configure your environment to point to the custom Clang binary. You can do this via `CMakePresets.json` or by setting `CMAKE_CXX_COMPILER`.
+We use a project-local toolchain to ensure consistency. Use our automation script to install the custom Clang fork into the `.toolchain/` directory:
 
 ```bash
-# Example using CMake Presets
-cmake --preset clang-p2996-debug
-cmake --build --preset clang-p2996-debug
+# Install Clang P2996 into .toolchain/ and auto-configure CMakePresets.json
+./tools/install_reflection_compiler.sh
 ```
+
+For a detailed breakdown of the environment, see the **[Setup Summary](Engineering/Setup.md)**.
 
 ### 3. Start a New Lesson
 Use the scaffolding tool to create the next lab:
