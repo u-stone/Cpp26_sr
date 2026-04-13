@@ -1,0 +1,39 @@
+# Day 01: Hello Meta-Info
+
+## Core Question
+> How do we obtain and query basic type information in the C++26 Reflection (P2996) proposal?
+
+## Theory & Reflection API
+- **The Reflection Operator (`^`)**: This is the primary entry point to reflection. It is an unevaluated expression that produces an object of type `std::meta::info`.
+- **`std::meta::info`**: This is a core type (likely a pointer or a handle in the implementation) that represents a reflected entity (a type, a member, a namespace, etc.). It is a scalar type, meaning it can be used in `constexpr` contexts.
+- **Reflection Queries**: These are `constexpr` functions that take a `std::meta::info` and return information about it.
+    - `std::meta::name_of(info)`: Returns a `std::string_view` of the name.
+    - `std::meta::is_type(info)`: Returns `true` if the reflected entity is a type.
+
+## Core Code Walkthrough
+- `constexpr std::meta::info int_info = ^int;`: The compiler creates a meta-information handle for the built-in `int` type.
+- `static_assert(std::meta::name_of(^int) == "int");`: Verification happens entirely at compile-time. If the name didn't match, the code wouldn't even compile.
+
+## Expected Output Description
+When run, the program should print the names of the reflected types and confirm that all compile-time checks passed:
+```
+--- Day 01: Hello Meta-Info ---
+Reflecting on built-in type: int
+Reflecting on custom struct: MyAwesomeStruct
+Verification: All static_asserts passed!
+```
+
+## Pitfalls & Retrospective
+- **Header Selection**: In the Bloomberg fork, reflection functions are in the `<experimental/meta>` header (following P2996 naming), not the standard C++ `<meta>`.
+- **Zero Evaluation**: Remember that `^T` does not instantiate `T` or perform any runtime actions. It is purely a compile-time construct.
+
+## Connections to Prior Knowledge
+- This replaces the old `typeid(T).name()` which was runtime-based, implementation-defined (mangled names), and not `constexpr` friendly.
+- It provides a way to do "metaprogramming" without complex template meta-programming (TMP) like `std::is_same_v` or `std::is_integral_v` manually.
+
+## Self-Test Q&A
+- **Q: Can `std::meta::info` be used at runtime?**
+- **A: No. It is intended for compile-time manipulation. While you can pass it to functions, those functions must generally be `constexpr` for the reflection logic to be useful.**
+
+## Asset Sources
+- P2996 Proposal: "Reflection for C++26"
