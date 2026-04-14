@@ -6,7 +6,7 @@
 ## Theory & Reflection API
 - **`std::meta::members_of(info)`**: Returns a `std::vector<std::meta::info>` of *all* members, including functions, nested types, and static data members. These vectors are heap-allocated and must be processed within `consteval` contexts.
 - **`std::meta::is_function(info)`**: A query to determine if the meta-info represents a function or member function.
-- **`std::meta::is_static(info)`**: Determines if a member is static.
+- **`std::meta::is_static_member(info)`**: Determines if a member is static.
 - **`std::meta::has_attribute(info, attr_info)`**: Checks if a declaration has a specific attribute. The attribute itself can be reflected using `^^attribute_name`.
 
 ## Core Code Walkthrough

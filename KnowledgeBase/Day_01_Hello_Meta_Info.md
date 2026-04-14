@@ -14,8 +14,17 @@
 - **Index-based Extraction**: Since reflection collections are vectors, they are indexed using `[i]`. This is often used with `std::index_sequence` for expansion.
 
 ## Core Code Walkthrough
-- `constexpr std::meta::info int_info = ^^int;`: The compiler creates a meta-information handle for the built-in `int` type.
-- `static_assert(std::meta::display_string_of(^^int) == "int");`: Verification happens entirely at compile-time.
+- **Metadata Extraction Helper**:
+    ```cpp
+    template <typename T, size_t I>
+    consteval std::string_view get_member_name() {
+        return std::meta::identifier_of(std::meta::nonstatic_data_members_of(^^T, std::meta::access_context::unchecked())[I]);
+    }
+    ```
+    This helper retrieves the identifier of the member at index `I` entirely at compile-time.
+- **Iteration via Index Sequence**:
+    The `dump_members` function uses `std::make_index_sequence` to expand a parameter pack of indices, allowing us to call our `consteval` helper for each member without storing a heap-allocated vector.
+- `constexpr std::meta::info int_info = ^^int;`: Obtaining meta-info for a built-in type remains a direct operation.
 
 ## Expected Output Description
 When run, the program should print the names of the reflected types and confirm that all compile-time checks passed:
