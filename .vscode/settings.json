@@ -1,0 +1,13 @@
+{
+    "cmake.configureOnOpen": true,
+    "cmake.generator": "Ninja",
+    "cmake.options.statusBarVisibility": "visible",
+    "cmake.buildDirectory": "${workspaceFolder}/build/${buildKit}",
+    "cmake.additionalCompilerNames": [
+        "${workspaceFolder}/.toolchain/clang-p2996/bin/clang++"
+    ],
+    "C_Cpp.default.cppStandard": "c++2c",
+    "C_Cpp.default.compilerPath": "${workspaceFolder}/.toolchain/clang-p2996/bin/clang++",
+    "C_Cpp.default.intelliSenseMode": "macos-clang-x64",
+    "C_Cpp.default.compileCommands": "${workspaceFolder}/build/clang-p2996-debug/compile_commands.json"
+}

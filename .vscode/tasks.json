@@ -1,0 +1,22 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build All Labs",
+            "type": "shell",
+            "command": "cmake --build --preset clang-p2996-debug",
+            "group": "build",
+            "problemMatcher": "$gcc"
+        },
+        {
+            "label": "Build Current Lab",
+            "type": "shell",
+            "command": "cmake --build --preset clang-p2996-debug --target ${relativeFileDirnameBasename}",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": "$gcc"
+        }
+    ]
+}

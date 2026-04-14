@@ -13,8 +13,7 @@ lib/
 *.dylib
 
 # IDE & Editor
-.vscode/
-.idea/
+# .vscode/  (We commit this now as it's configured with portable workspace variables)
 *.swp
 *.swo
 .DS_Store
