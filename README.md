@@ -40,6 +40,7 @@ This project follows the **Deep Mastery Protocol**, which enforces a rigorous lo
 - **[KnowledgeBase/](KnowledgeBase/)**: Feynman-style deep-dive notes for each lesson.
 - **[SyncState.md](SyncState.md)**: Current session focus and handover dashboard.
 - **[Retrospective](Engineering/Retrospective.md)**: **CRITICAL** - A record of all build issues, API changes, and lessons learned during environment setup.
+- **[Advanced Use Cases](Reference/ReflectionUseCases.md)**: A summary of high-level applications for reflection beyond basic serialization.
 
 ### Start a New Lesson
 Use the scaffolding tool to create the next lab:
@@ -54,6 +55,7 @@ Use the scaffolding tool to create the next lab:
     - `Setup.md`: Environment configuration guide.
     - `Standards.md`: C++26 coding and project standards.
     - `Retrospective.md`: Log of mistakes and their solutions.
+- `Reference/`: Advanced use cases and terminology guides.
 - `Protocol/`: The DMP specification.
 - `tools/`: Automation scripts (`install`, `scaffold`, `build_all`, `run_lab`).
 
