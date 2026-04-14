@@ -5,7 +5,7 @@
             "name": "Debug Current Lab",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/clang-p2996-debug/${relativeFileDirnameBasename}",
+            "program": "${workspaceFolder}/build/clang-p2996-debug/${fileDirnameBasename}",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

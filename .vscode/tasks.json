@@ -11,7 +11,7 @@
         {
             "label": "Build Current Lab",
             "type": "shell",
-            "command": "cmake --build --preset clang-p2996-debug --target ${relativeFileDirnameBasename}",
+            "command": "cmake --build --preset clang-p2996-debug --target ${fileDirnameBasename}",
             "group": {
                 "kind": "build",
                 "isDefault": true
