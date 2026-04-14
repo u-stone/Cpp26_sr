@@ -1,26 +1,26 @@
-# Day 08: Command Line Parser
+# Day 08: 命令行解析器 (Command Line Parser)
 
-## Core Question
-> How can reflection be used to eliminate the boilerplate of command-line argument parsing?
+## 核心问题
+> 如何使用反射消除命令行参数解析的样板代码？
 
-## Theory & Reflection API
-- **Dynamic Mapping**: By reflecting on a struct's members, we can create a dynamic map between strings (CLI flags) and actual variables.
-- **`std::meta::identifier_of` in runtime loops**: While reflection is compile-time, we can use the results (like field names) in runtime logic (like comparing with `argv`).
-- **Splicing for Assignment**: `obj.[: f :] = value` allows us to write to any field of any struct dynamically, as long as we have its meta-info.
+## 理论与反射 API
+- **动态映射**：通过反射结构体的成员，我们可以创建字符串（CLI 标志）与实际变量之间的动态映射。
+- **运行时循环中的 `std::meta::identifier_of`**：虽然反射发生在编译期，但我们可以将结果（如字段名称）用于运行时逻辑（如与 `argv` 进行比较）。
+- **用于赋值的拼接**：`obj.[: f :] = value` 允许我们动态地向任何结构体的任何字段写入值，只要我们拥有其元信息。
 
-## Core Code Walkthrough
-- **The Generic Parser Loop**:
-    1. Reflect on the configuration struct `T`.
-    2. Get all fields using `nonstatic_data_members_of`.
-    3. Iterate through `argv`.
-    4. For each `--flag`, loop through reflected fields.
-    5. If names match:
-        - Use `std::meta::type_of(f)` to determine the field's type.
-        - Use `if constexpr` to apply the correct parsing logic (`std::from_chars` for ints, etc.).
-        - Use `config.[: f :] = parsed_value` to update the instance.
+## 核心代码走读
+- **泛型解析器循环**：
+    1. 反射配置结构体 `T`。
+    2. 使用 `nonstatic_data_members_of` 获取所有字段。
+    3. 遍历 `argv`。
+    4. 对于每个以 `--` 开头的标志，遍历反射出的字段。
+    5. 如果名称匹配：
+        - 使用 `std::meta::type_of(f)` 确定字段类型。
+        - 使用 `if constexpr` 应用正确的解析逻辑（例如，对整数使用 `std::from_chars`）。
+        - 使用 `config.[: f :] = parsed_value` 更新实例。
 
-## Expected Output Description
-The program parses simulated arguments and updates the configuration struct:
+## 预期输出描述
+程序解析模拟的参数并更新配置结构体：
 ```
 --- Day 08: Command Line Parser ---
 Simulating arguments: --port 8080 --host example.com --verbose
@@ -33,20 +33,20 @@ Parsed Configuration:
   - Timeout: 5000ms
 ```
 
-## Pitfalls & Retrospective
-- **Ambiguity**: If two fields have the same name (not possible in a single struct, but possible with nested structs), more advanced logic would be needed.
-- **Error Handling**: A production-ready parser would need robust error handling for malformed input (e.g., passing a string to an `int` port).
-- **Aliases**: Supporting shorthand flags (e.g., `-p` for `--port`) would require custom attributes, which we explored in Day 04.
+## 陷阱与回顾
+- **歧义**：如果两个字段具有相同的名称（在单个结构体中不可能，但在嵌套结构体中可能），则需要更高级的逻辑。
+- **错误处理**：生产级解析器需要对错误输入（例如，将字符串传递给 `int` 类型的端口）进行健壮的错误处理。
+- **别名**：支持简写标志（例如，用 `-p` 代替 `--port`）需要自定义属性，我们在 Day 04 中已经探索过这一内容。
 
-## Connections to Prior Knowledge
-- This is the reflection-based alternative to libraries like `gflags` or `getopt`, which require manual registration of every flag.
-- This is "declarative configuration"—you define your data structure, and the system automatically knows how to populate it from external input.
+## 与已有知识的联系
+- 这是基于反射的替代方案，取代了像 `gflags` 或 `getopt` 这样需要手动注册每个标志的库。
+- 这是“声明式配置”——你定义数据结构，系统自动知道如何从外部输入中填充它。
 
-## Self-Test Q&A
-- **Q: Can this handle nested configurations?**
-- **A: Yes, with recursion (similar to the JSON serializer in Day 07).**
-- **Q: How would you implement a `-h` help flag?**
-- **A: Reflect on all members and print their names and types as part of a "Usage" message.**
+## 自测问答
+- **Q: 它可以处理嵌套配置吗？**
+- **A: 可以，通过递归（类似于 Day 07 中的 JSON 序列化器）。**
+- **Q: 你会如何实现 `-h` 帮助标志？**
+- **A: 反射所有成员，并打印它们的名称和类型作为“用法”消息的一部分。**
 
-## Asset Sources
-- P2996 Proposal: "Reflection for C++26"
+## 资源来源
+- P2996 提案："Reflection for C++26"

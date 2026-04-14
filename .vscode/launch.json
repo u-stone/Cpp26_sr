@@ -23,6 +23,27 @@
             }
         },
         {
+            "name": "Debug Current Lab (External Console)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/clang-p2996-debug/${fileDirnameBasename}",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [
+                {
+                    "name": "DYLD_LIBRARY_PATH",
+                    "value": "${workspaceFolder}/.toolchain/clang-p2996/lib"
+                }
+            ],
+            "externalConsole": true,
+            "MIMode": "lldb",
+            "preLaunchTask": "Build Current Lab",
+            "osx": {
+                "MIMode": "lldb"
+            }
+        },
+        {
             "name": "Debug Selected Target (CMake Tools)",
             "type": "cppdbg",
             "request": "launch",
