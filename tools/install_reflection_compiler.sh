@@ -26,27 +26,31 @@ fi
 mkdir -p "$BUILD_DIR/build"
 cd "$BUILD_DIR/build"
 
-echo "⚙️  Configuring LLVM/Clang (Release mode, Clang only)..."
+echo "⚙️  Configuring LLVM/Clang + runtimes (Release mode)..."
+# We must include libcxx, libcxxabi, and libunwind to get the reflection headers and runtime support
 cmake -G Ninja \
-      -DLLVM_ENABLE_PROJECTS=clang \
+      -DLLVM_ENABLE_PROJECTS="clang" \
+      -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libunwind" \
       -DCMAKE_BUILD_TYPE=Release \
       -DCMAKE_INSTALL_PREFIX="$INSTALL_PREFIX" \
       ../llvm
 
-echo "🔨 Building Clang (this may take a long time)..."
-ninja clang
+echo "🔨 Building Clang and runtimes (this will take a while)..."
+# Build the compiler and the runtimes
+ninja clang cxx cxxabi unwind
+
 echo "📦 Installing to $INSTALL_PREFIX..."
-ninja install
+# Install the compiler and the runtimes
+ninja install-clang install-cxx install-cxxabi install-unwind
 
 # 3. Update CMakePresets.json in the project root
-PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PRESETS_FILE="$PROJECT_ROOT/CMakePresets.json"
-CLANG_PATH="$INSTALL_PREFIX/bin/clang++"
+# We point to the local toolchain using ${sourceDir} for portability
+CLANG_PATH="\${sourceDir}/.toolchain/clang-p2996/bin/clang++"
 
 if [ -f "$PRESETS_FILE" ]; then
     echo "📝 Updating CMakePresets.json with new compiler path..."
-    # Use sed to replace the CMAKE_CXX_COMPILER value. 
-    # Note: This is a simple regex that assumes the structure created in bootstrap.
+    # Note: On macOS, sed -i requires an empty string for the extension if you don't want a backup
     if [[ "$OSTYPE" == "darwin"* ]]; then
         sed -i '' "s|\"CMAKE_CXX_COMPILER\": \".*\"|\"CMAKE_CXX_COMPILER\": \"$CLANG_PATH\"|g" "$PRESETS_FILE"
     else

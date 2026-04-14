@@ -20,4 +20,5 @@ cmake --build --preset "$PRESET" --parallel
 
 # 3. List built executables
 echo -e "\n✅ Build complete! Executables available in build/$PRESET/:"
-find "$PROJECT_ROOT/build/$PRESET" -maxdepth 1 -type f -executable -not -name "*.so" -not -name "*.dylib" -not -name "*.dll" | sort
+# macOS find compatibility: use -perm +111 or similar, or just filter by type f
+find "$PROJECT_ROOT/build/$PRESET" -maxdepth 1 -type f -perm +111 -not -name "*.so" -not -name "*.dylib" -not -name "*.dll" | sort

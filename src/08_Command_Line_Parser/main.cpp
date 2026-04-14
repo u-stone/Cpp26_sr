@@ -1,15 +1,15 @@
 // Day 08: Command Line Parser
-// [PLAN]: Create a generic CLI parser that maps arguments to struct fields.
-// Example: --port 8080 --host localhost -> Config{ .port = 8080, .host = "localhost" }
+// [PLAN]: Use index-sequence expansion with separated extraction and mapping logic.
 
 #include <experimental/meta>
-#include <print>
+#include <iostream>
 #include <string_view>
 #include <vector>
 #include <charconv>
 #include <string>
+#include <format>
+#include <utility>
 
-// A sample configuration struct
 struct AppConfig {
     int port = 3000;
     std::string_view host = "127.0.0.1";
@@ -17,49 +17,53 @@ struct AppConfig {
     int timeout_ms = 5000;
 };
 
-// Generic parser function
+template <typename T, size_t I>
+consteval std::meta::info get_field_info() {
+    return std::meta::nonstatic_data_members_of(^^T, std::meta::access_context::unchecked())[I];
+}
+
 template <typename T>
 T parse_args(int argc, char* argv[]) {
     T config;
     std::vector<std::string_view> args(argv + 1, argv + argc);
-
-    constexpr std::meta::info type_meta = ^T;
-    constexpr auto fields = std::meta::nonstatic_data_members_of(type_meta);
 
     for (size_t i = 0; i < args.size(); ++i) {
         std::string_view arg = args[i];
         if (!arg.starts_with("--")) continue;
 
         std::string_view flag = arg.substr(2);
-
-        // Find a matching field using reflection
         bool found = false;
-        for (auto f : fields) {
-            if (std::meta::name_of(f) == flag) {
-                found = true;
-                using FieldType = [: std::meta::type_of(f) :];
+        
+        constexpr auto count = std::meta::nonstatic_data_members_of(^^T, std::meta::access_context::unchecked()).size();
 
-                // Check if it's a boolean flag (no value follows)
-                if constexpr (std::is_same_v<FieldType, bool>) {
-                    config.[: f :] = true;
-                } else {
-                    // Expect a value in the next argument
-                    if (i + 1 < args.size()) {
-                        std::string_view val_str = args[++i];
+        [&]<size_t... Is>(std::index_sequence<Is...>) {
+            ( ( [&]{
+                if (found) return;
+                constexpr auto f = get_field_info<T, Is>();
+                constexpr std::string_view field_name = std::meta::identifier_of(f);
+                
+                if (field_name == flag) {
+                    found = true;
+                    using FieldType = [: (std::meta::type_of(f)) :];
 
-                        if constexpr (std::is_same_v<FieldType, int>) {
-                            std::from_chars(val_str.data(), val_str.data() + val_str.size(), config.[: f :]);
-                        } else if constexpr (std::is_same_v<FieldType, std::string_view>) {
-                            config.[: f :] = val_str;
+                    if constexpr (std::is_same_v<FieldType, bool>) {
+                        config.[: f :] = true;
+                    } else {
+                        if (i + 1 < args.size()) {
+                            std::string_view val_str = args[++i];
+                            if constexpr (std::is_same_v<FieldType, int>) {
+                                std::from_chars(val_str.data(), val_str.data() + val_str.size(), config.[: f :]);
+                            } else if constexpr (std::is_same_v<FieldType, std::string_view>) {
+                                config.[: f :] = val_str;
+                            }
                         }
                     }
                 }
-                break;
-            }
-        }
+            }() ), ... );
+        }(std::make_index_sequence<count>{});
 
         if (!found) {
-            std::println("Warning: Unknown flag '--{}'", flag);
+            std::cout << std::format("Warning: Unknown flag '--{}'\n", flag);
         }
     }
 
@@ -67,9 +71,8 @@ T parse_args(int argc, char* argv[]) {
 }
 
 int main() {
-    std::println("--- Day 08: Command Line Parser ---");
+    std::cout << "--- Day 08: Command Line Parser ---\n";
 
-    // Simulate command line arguments
     const char* simulated_argv[] = { 
         "myapp", 
         "--port", "8080", 
@@ -79,18 +82,13 @@ int main() {
     };
     int simulated_argc = sizeof(simulated_argv) / sizeof(simulated_argv[0]);
 
-    std::println("Simulating arguments: --port 8080 --host example.com --verbose");
-
     AppConfig config = parse_args<AppConfig>(simulated_argc, (char**)simulated_argv);
 
-    std::println("\nParsed Configuration:");
-    std::println("  - Port: {}", config.port);
-    std::println("  - Host: {}", config.host);
-    std::println("  - Verbose: {}", config.verbose);
-    std::println("  - Timeout: {}ms", config.timeout_ms);
-
-    // Static check for one field to ensure basic reflection works
-    static_assert(std::meta::name_of(std::meta::nonstatic_data_members_of(^AppConfig)[0]) == "port");
+    std::cout << "\nParsed Configuration:\n";
+    std::cout << std::format("  - Port: {}\n", config.port);
+    std::cout << std::format("  - Host: {}\n", config.host);
+    std::cout << std::format("  - Verbose: {}\n", config.verbose);
+    std::cout << std::format("  - Timeout: {}ms\n", config.timeout_ms);
 
     return 0;
 }

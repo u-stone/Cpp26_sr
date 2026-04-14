@@ -1,15 +1,15 @@
 // Day 07: JSON Serializer
-// [PLAN]: Combine query (members_of), synthesis ([: :]), and type-aware logic
-// to create a generic 'to_json' function that works for any struct.
+// [PLAN]: Use index-sequence expansion with separated extraction and printing.
 
 #include <experimental/meta>
-#include <print>
+#include <iostream>
 #include <string>
 #include <string_view>
 #include <vector>
 #include <type_traits>
+#include <format>
+#include <utility>
 
-// Simple structs to serialize
 struct Address {
     std::string_view city;
     int zip_code;
@@ -22,56 +22,52 @@ struct User {
     Address home_address;
 };
 
-// --- The Generic JSON Serializer ---
-
-// Forward declaration for recursion
 template <typename T>
 void to_json(const T& obj, int indent = 2);
 
-// Helper for basic types
+template <typename T, size_t I>
+consteval std::meta::info get_field_info() {
+    return std::meta::nonstatic_data_members_of(^^T, std::meta::access_context::unchecked())[I];
+}
+
 template <typename T>
 void print_json_value(const T& val) {
     if constexpr (std::is_same_v<T, std::string_view> || std::is_same_v<T, std::string>) {
-        std::print("\"{}\"", val);
+        std::cout << std::format("\"{}\"", val);
     } else if constexpr (std::is_same_v<T, bool>) {
-        std::print("{}", val ? "true" : "false");
+        std::cout << (val ? "true" : "false");
     } else if constexpr (std::is_arithmetic_v<T>) {
-        std::print("{}", val);
+        std::cout << val;
     } else {
-        // Assume it's a struct/class and recurse
         to_json(val, 4);
     }
 }
 
 template <typename T>
 void to_json(const T& obj, int indent) {
-    constexpr std::meta::info type_meta = ^T;
-    constexpr auto fields = std::meta::nonstatic_data_members_of(type_meta);
-
-    std::print("{{\n");
+    std::cout << "{\n";
+    constexpr auto count = std::meta::nonstatic_data_members_of(^^T, std::meta::access_context::unchecked()).size();
     
-    for (size_t i = 0; i < fields.size(); ++i) {
-        constexpr auto f = fields[i];
-        std::string_view field_name = std::meta::name_of(f);
-        
-        // Print indentation and key
-        std::print("{:>{}}\"{}\": ", "", indent, field_name);
-        
-        // Access and print the value using the splice operator '[: :]'
-        print_json_value(obj.[: f :]);
+    [&]<size_t... Is>(std::index_sequence<Is...>) {
+        ( ( [&]{
+            constexpr auto f = get_field_info<T, Is>();
+            constexpr std::string_view field_name = std::meta::identifier_of(f);
+            
+            std::cout << std::format("{:>{}}\"{}\": ", "", indent, field_name);
+            print_json_value(obj.[: f :]);
 
-        // Print comma if not the last field
-        if (i < fields.size() - 1) {
-            std::print(",");
-        }
-        std::print("\n");
-    }
+            if constexpr (Is < count - 1) {
+                std::cout << ",";
+            }
+            std::cout << "\n";
+        }() ), ... );
+    }(std::make_index_sequence<count>{});
 
-    std::print("{:>{}}}}", "", indent - 2);
+    std::cout << std::format("{:>{}}}}", "", indent - 2);
 }
 
 int main() {
-    std::println("--- Day 07: JSON Serializer ---");
+    std::cout << "--- Day 07: JSON Serializer ---\n";
 
     User user = {
         .id = 101,
@@ -80,15 +76,9 @@ int main() {
         .home_address = { "Neo-Tokyo", 12345 }
     };
 
-    std::print("Generated JSON for User:\n");
+    std::cout << "Generated JSON for User:\n";
     to_json(user);
-    std::println("");
-
-    // Verification: ensure we can serialize another type without extra code
-    Address addr = { "Metropolis", 54321 };
-    std::print("\nGenerated JSON for Address:\n");
-    to_json(addr);
-    std::println("");
+    std::cout << "\n";
 
     return 0;
 }

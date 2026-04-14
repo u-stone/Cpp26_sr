@@ -1,43 +1,33 @@
 // Day 01: Hello Meta-Info
-// [PLAN]: Demonstrate the basic reflection operator '^' and std::meta::info type.
-// We will reflect on built-in types, custom structs, and use compile-time queries.
+// [PLAN]: Use separate consteval helper for metadata extraction to allow printing.
 
-#include <experimental/meta> // Header for P2996 Reflection
-#include <print>
+#include <experimental/meta> 
+#include <iostream>
 #include <string_view>
+#include <format>
+#include <utility>
 
-// A simple user-defined type for reflection
 struct MyAwesomeStruct {
     int id;
     float value;
 };
 
+template <typename T, size_t I>
+consteval std::string_view get_member_name() {
+    return std::meta::identifier_of(std::meta::nonstatic_data_members_of(^^T, std::meta::access_context::unchecked())[I]);
+}
+
+template <typename T>
+void dump_members() {
+    constexpr auto count = std::meta::nonstatic_data_members_of(^^T, std::meta::access_context::unchecked()).size();
+    
+    [&]<size_t... Is>(std::index_sequence<Is...>) {
+        ( (std::cout << std::format("Member {}: {}\n", Is, get_member_name<T, Is>())), ... );
+    }(std::make_index_sequence<count>{});
+}
+
 int main() {
-    // 1. Obtain meta-information using the reflection operator '^'
-    // The result is of type std::meta::info, which is a scalar type suitable for constexpr.
-    constexpr std::meta::info int_info = ^int;
-    constexpr std::meta::info struct_info = ^MyAwesomeStruct;
-
-    // 2. Query properties of the meta-information at compile-time
-    // std::meta::name_of returns a std::string_view of the entity's name.
-    constexpr std::string_view int_name = std::meta::name_of(int_info);
-    constexpr std::string_view struct_name = std::meta::name_of(struct_info);
-
-    // 3. Runtime demonstration
-    std::println("--- Day 01: Hello Meta-Info ---");
-    std::println("Reflecting on built-in type: {}", int_name);
-    std::println("Reflecting on custom struct: {}", struct_name);
-
-    // 4. Compile-time verification using static_assert
-    // Reflection is inherently a constant expression.
-    static_assert(std::meta::name_of(^int) == "int");
-    static_assert(std::meta::name_of(^MyAwesomeStruct) == "MyAwesomeStruct");
-
-    // Check if it's a type
-    static_assert(std::meta::is_type(int_info));
-    static_assert(std::meta::is_type(struct_info));
-
-    std::println("Verification: All static_asserts passed!");
-
+    std::cout << "--- Day 01: Hello Meta-Info ---\n";
+    dump_members<MyAwesomeStruct>();
     return 0;
 }

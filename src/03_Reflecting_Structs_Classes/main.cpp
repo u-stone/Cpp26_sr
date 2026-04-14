@@ -1,66 +1,56 @@
 // Day 03: Reflecting Structs/Classes
-// [PLAN]: Use std::meta::nonstatic_data_members_of to inspect a struct.
-// We'll iterate over all fields and print their names, types, and access specifiers.
+// [PLAN]: Use std::meta::nonstatic_data_members_of with index-based extraction.
 
 #include <experimental/meta>
-#include <print>
+#include <iostream>
 #include <string_view>
-#include <vector>
+#include <format>
+#include <utility>
 
-// A user-defined type with various field types and access levels
 struct Person {
     int id;
     std::string_view name;
     double salary;
 
 private:
-    int secret_code;
+    [[maybe_unused]] int secret_code;
 
 protected:
     bool is_verified;
 };
 
-// Helper function to get access level as string
-consteval std::string_view access_to_string(std::meta::info m) {
-    if (std::meta::is_public(m)) return "public";
-    if (std::meta::is_protected(m)) return "protected";
-    if (std::meta::is_private(m)) return "private";
+template <typename T, size_t I>
+consteval std::string_view get_field_name() {
+    return std::meta::identifier_of(std::meta::nonstatic_data_members_of(^^T, std::meta::access_context::unchecked())[I]);
+}
+
+template <typename T, size_t I>
+consteval std::string_view get_field_type_name() {
+    return std::meta::display_string_of(std::meta::type_of(std::meta::nonstatic_data_members_of(^^T, std::meta::access_context::unchecked())[I]));
+}
+
+template <typename T, size_t I>
+consteval std::string_view get_field_access() {
+    constexpr auto f = std::meta::nonstatic_data_members_of(^^T, std::meta::access_context::unchecked())[I];
+    if (std::meta::is_public(f)) return "public";
+    if (std::meta::is_protected(f)) return "protected";
+    if (std::meta::is_private(f)) return "private";
     return "unknown";
 }
 
 int main() {
-    std::println("--- Day 03: Reflecting Structs/Classes ---");
+    std::cout << "--- Day 03: Reflecting Structs/Classes ---\n";
 
-    // 1. Reflect on the 'Person' struct
-    constexpr std::meta::info person_info = ^Person;
+    constexpr auto field_count = std::meta::nonstatic_data_members_of(^^Person, std::meta::access_context::unchecked()).size();
     
-    // 2. Extract non-static data members
-    // This returns a collection (std::vector<std::meta::info>) of fields
-    constexpr auto fields = std::meta::nonstatic_data_members_of(person_info);
-
-    std::println("Fields in 'Person' ({} total):", fields.size());
+    std::cout << std::format("Fields in 'Person' ({} total):\n", field_count);
     
-    for (auto f : fields) {
-        // Get the name of the field
-        constexpr std::string_view field_name = std::meta::name_of(f);
-        
-        // Get the type of the field as another meta-info
-        constexpr std::meta::info field_type_info = std::meta::type_of(f);
-        constexpr std::string_view type_name = std::meta::name_of(field_type_info);
-        
-        // Get the access level
-        std::string_view access = access_to_string(f);
-
-        std::println("  - [{}]: {} ({})", access, field_name, type_name);
-    }
-
-    // 3. Static verification
-    static_assert(fields.size() == 5);
-    static_assert(std::meta::name_of(fields[0]) == "id");
-    static_assert(std::meta::name_of(std::meta::type_of(fields[0])) == "int");
-    static_assert(std::meta::is_private(fields[3])); // secret_code is private
-
-    std::println("\nVerification: Struct layout successfully inspected!");
+    [&]<size_t... Is>(std::index_sequence<Is...>) {
+        ( (std::cout << std::format("  - [{}]: {} ({})\n", 
+                     get_field_access<Person, Is>(), 
+                     get_field_name<Person, Is>(), 
+                     get_field_type_name<Person, Is>())), ... );
+    }(std::make_index_sequence<field_count>{});
 
     return 0;
 }

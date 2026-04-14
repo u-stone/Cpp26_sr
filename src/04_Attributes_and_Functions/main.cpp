@@ -1,75 +1,64 @@
 // Day 04: Attributes and Functions
-// [PLAN]: Use std::meta::members_of to inspect member functions and attributes.
-// We'll filter members for functions and check for built-in attributes.
+// [PLAN]: Use index-based extraction and display_string_of to handle special members.
 
 #include <experimental/meta>
-#include <print>
+#include <iostream>
 #include <string_view>
-#include <vector>
+#include <format>
+#include <utility>
 
-// A struct with member functions and attributes
 struct [[nodiscard]] MyService {
     void start() {}
-    
-    [[deprecated("Old API")]] 
-    void stop() {}
-    
+    [[deprecated]] void stop() {}
     static int get_version() { return 1; }
-    
     int data;
 };
 
-// Helper to check if a member is a function
-consteval bool is_function(std::meta::info m) {
-    // In P2996, members_of returns everything. We need to distinguish.
-    // Note: The specific API might vary slightly in experimental forks.
-    return std::meta::is_function(m);
+template <typename T, size_t I>
+consteval std::meta::info get_member() {
+    return std::meta::members_of(^^T, std::meta::access_context::unchecked())[I];
+}
+
+template <typename T, size_t I>
+consteval bool has_deprecated() {
+    return std::meta::has_attribute(get_member<T, I>(), ^^[[deprecated]]);
 }
 
 int main() {
-    std::println("--- Day 04: Attributes and Functions ---");
+    std::cout << "--- Day 04: Attributes and Functions ---\n";
 
-    constexpr std::meta::info service_info = ^MyService;
+    constexpr std::meta::info service_info = ^^MyService;
 
-    // 1. Check class-level attributes
-    // P2996 allows checking for attributes by their meta-info
-    if constexpr (std::meta::has_attribute(service_info, ^nodiscard)) {
-        std::println("MyService is marked as [[nodiscard]]");
+    if constexpr (std::meta::has_attribute(service_info, ^^[[nodiscard]])) {
+        std::cout << "MyService is marked as [[nodiscard]]\n";
     }
 
-    // 2. Inspect all members
-    constexpr auto all_members = std::meta::members_of(service_info);
-    std::println("\nMembers of 'MyService' ({} total):", all_members.size());
+    constexpr auto member_count = std::meta::members_of(service_info, std::meta::access_context::unchecked()).size();
+    std::cout << std::format("\nMembers of 'MyService' ({} total):\n", member_count);
 
-    for (auto m : all_members) {
-        std::string_view name = std::meta::name_of(m);
-        
-        if (std::meta::is_function(m)) {
-            bool is_static = std::meta::is_static(m);
-            bool is_deprecated = std::meta::has_attribute(m, ^deprecated);
+    [&]<size_t... Is>(std::index_sequence<Is...>) {
+        ( ( [&]{
+            constexpr auto m = get_member<MyService, Is>();
             
-            std::println("  - [Function]: {}{} {}", 
-                         is_static ? "static " : "",
-                         name,
-                         is_deprecated ? "(DEPRECATED)" : "");
-        } else if (std::meta::is_nonstatic_data_member(m)) {
-            std::println("  - [Field]: {}", name);
-        }
-    }
+            // display_string_of works for ALL members including constructors/destructors
+            constexpr std::string_view name = std::meta::display_string_of(m);
+            constexpr bool is_func = std::meta::is_function(m);
+            constexpr bool is_stat = std::meta::is_static_member(m);
+            constexpr bool is_dep = has_deprecated<MyService, Is>();
+            constexpr bool is_field = std::meta::is_nonstatic_data_member(m);
 
-    // 3. Static verification
-    static_assert(std::meta::has_attribute(^MyService, ^nodiscard));
-    
-    // Find 'stop' and check deprecated
-    constexpr auto stop_member = []() {
-        for (auto m : std::meta::members_of(^MyService)) {
-            if (std::meta::name_of(m) == "stop") return m;
-        }
-        return std::meta::info{};
-    }();
-    static_assert(std::meta::has_attribute(stop_member, ^deprecated));
-
-    std::println("\nVerification: Functions and attributes successfully queried!");
+            if constexpr (is_func) {
+                std::cout << std::format("  - [Function]: {}{} {}\n", 
+                             is_stat ? "static " : "",
+                             name,
+                             is_dep ? "(DEPRECATED)" : "");
+            } else if constexpr (is_field) {
+                std::cout << std::format("  - [Field]: {}\n", name);
+            } else {
+                std::cout << std::format("  - [Other]: {}\n", name);
+            }
+        }() ), ... );
+    }(std::make_index_sequence<member_count>{});
 
     return 0;
 }

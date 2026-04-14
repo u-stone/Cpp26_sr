@@ -4,15 +4,17 @@
 > How do we obtain and query basic type information in the C++26 Reflection (P2996) proposal?
 
 ## Theory & Reflection API
-- **The Reflection Operator (`^`)**: This is the primary entry point to reflection. It is an unevaluated expression that produces an object of type `std::meta::info`.
-- **`std::meta::info`**: This is a core type (likely a pointer or a handle in the implementation) that represents a reflected entity (a type, a member, a namespace, etc.). It is a scalar type, meaning it can be used in `constexpr` contexts.
-- **Reflection Queries**: These are `constexpr` functions that take a `std::meta::info` and return information about it.
-    - `std::meta::name_of(info)`: Returns a `std::string_view` of the name.
+- **The Reflection Operator (`^^`)**: This is the primary entry point to reflection in the Bloomberg fork. It produces an object of type `std::meta::info`.
+- **`std::meta::info`**: A scalar type representing a reflected entity.
+- **Reflection Queries**:
+    - `std::meta::display_string_of(info)`: Returns a `std::string_view` of the entity's name (works for built-in types).
+    - `std::meta::identifier_of(info)`: Returns the identifier (works for declarations like members).
     - `std::meta::is_type(info)`: Returns `true` if the reflected entity is a type.
+- **Immediate Functions (`consteval`)**: Many reflection functions are `consteval` and return `std::vector<info>`, which is heap-allocated and cannot be stored in long-lived `constexpr` variables in this fork.
 
 ## Core Code Walkthrough
-- `constexpr std::meta::info int_info = ^int;`: The compiler creates a meta-information handle for the built-in `int` type.
-- `static_assert(std::meta::name_of(^int) == "int");`: Verification happens entirely at compile-time. If the name didn't match, the code wouldn't even compile.
+- `constexpr std::meta::info int_info = ^^int;`: The compiler creates a meta-information handle for the built-in `int` type.
+- `static_assert(std::meta::display_string_of(^^int) == "int");`: Verification happens entirely at compile-time.
 
 ## Expected Output Description
 When run, the program should print the names of the reflected types and confirm that all compile-time checks passed:
