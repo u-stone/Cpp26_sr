@@ -13,7 +13,7 @@ Since C++26 Reflection is not yet in mainline compilers, you MUST use a speciali
 - **Ninja**: Recommended generator
 
 ### 2. Environment Setup
-We use a project-local toolchain to ensure consistency. Use our automation script to install the custom Clang fork into the `.toolchain/` directory:
+We use a project-local toolchain to ensure consistency. Use our automation script to install the custom Clang fork and its runtime into the `.toolchain/` directory:
 
 ```bash
 # Install Clang P2996 into .toolchain/ and auto-configure CMakePresets.json
@@ -22,23 +22,40 @@ We use a project-local toolchain to ensure consistency. Use our automation scrip
 
 For a detailed breakdown of the environment, see the **[Setup Summary](Engineering/Setup.md)**.
 
-### 3. Start a New Lesson
-Use the scaffolding tool to create the next lab:
+### 3. Build & Run
+You can build all experiments or run a specific one using our helper scripts:
+
 ```bash
-./tools/scaffold_lab.sh 01 Hello_Meta_Info
+# Build all 8 labs
+./tools/build_all.sh
+
+# Build and run a specific lab (e.g., Day 07)
+./tools/run_lab.sh 07
 ```
 
 ## 🧠 Learning Methodology (DMP)
 This project follows the **Deep Mastery Protocol**, which enforces a rigorous loop of coding, verification, and distillation.
-- **`Roadmap.md`**: Your syllabus and progress tracker.
-- **`KnowledgeBase/`**: Deep-dive notes for each lesson.
-- **`SyncState.md`**: Current session focus and handover dashboard.
+
+- **[Roadmap.md](Roadmap.md)**: Your 8-day syllabus and progress tracker.
+- **[KnowledgeBase/](KnowledgeBase/)**: Feynman-style deep-dive notes for each lesson.
+- **[SyncState.md](SyncState.md)**: Current session focus and handover dashboard.
+- **[Retrospective](Engineering/Retrospective.md)**: **CRITICAL** - A record of all build issues, API changes, and lessons learned during environment setup.
+
+### Start a New Lesson
+Use the scaffolding tool to create the next lab:
+```bash
+./tools/scaffold_lab.sh XX Topic_Name
+```
 
 ## 📁 Directory Structure
 - `src/`: Practice code for each lesson.
-- `KnowledgeBase/`: Feynman-style notes for each lesson.
-- `Engineering/`: Coding standards and environment setup.
+- `KnowledgeBase/`: Detailed analysis of reflection primitives.
+- `Engineering/`:
+    - `Setup.md`: Environment configuration guide.
+    - `Standards.md`: C++26 coding and project standards.
+    - `Retrospective.md`: Log of mistakes and their solutions.
 - `Protocol/`: The DMP specification.
+- `tools/`: Automation scripts (`install`, `scaffold`, `build_all`, `run_lab`).
 
 ## ⚖️ License
 MIT

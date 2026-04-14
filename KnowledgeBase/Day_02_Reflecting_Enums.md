@@ -4,16 +4,16 @@
 > How can we iterate over all members of an enum and convert their values back to strings without manual mappings?
 
 ## Theory & Reflection API
-- **`std::meta::enumerators_of(info)`**: Returns a sequence (usually a `std::vector<std::meta::info>`) of all enumerators for a given enum type.
-- **`std::meta::value_of<T>(info)`**: Extracts the underlying value of an enumerator. It returns the value as type `T`. This is key for mapping runtime values back to their metadata.
-- **Iteration over Metadata**: Since `std::meta::info` is a compile-time value, we can use standard C++ iteration (like range-based `for`) to process metadata collections.
+- **`std::meta::enumerators_of(info)`**: Returns a `std::vector<std::meta::info>` of all enumerators for a given enum type. Since these results are heap-allocated in this fork, they should be processed within `consteval` contexts.
+- **`std::meta::extract<T>(info)`**: Extracts the underlying value of an enumerator or constant from its metadata. This is key for mapping runtime values back to their metadata.
+- **Index-based Extraction**: We typically access reflection results using indices (e.g., `enumerators_of(^^E)[i]`) within helper functions that can be expanded using `std::index_sequence`.
 
 ## Core Code Walkthrough
 - **Enum-to-String Helper**:
-    - `constexpr auto enumerators = std::meta::enumerators_of(^E);`: Gets the metadata for all constants in the enum.
-    - `for (auto e : enumerators)`: Loops through the metadata.
-    - `if (std::meta::value_of<E>(e) == value)`: Compares the runtime value with the value stored in the metadata.
-    - `return std::meta::name_of(e);`: Returns the name if a match is found.
+    - `constexpr auto count = std::meta::enumerators_of(^^E).size();`: Gets the total number of constants in the enum.
+    - `return std::meta::identifier_of(std::meta::enumerators_of(^^E)[I]);`: Returns the identifier at index `I`.
+    - `if (get_enum_value<E, Is>() == value)`: Compares the runtime value with the value extracted from the metadata at index `Is`.
+    - `return get_enum_name<E, Is>();`: Returns the name if a match is found.
 
 ## Expected Output Description
 Running the code should output the full list of colors and their explicit values, then demonstrate a specific conversion:
@@ -28,7 +28,6 @@ Enumerators of Color:
   - Name: Yellow, Value: 12
 
 My current color is: Cyan
-Verification: All enumerators matched correctly!
 ```
 
 ## Pitfalls & Retrospective

@@ -4,20 +4,21 @@
 > How can we programmatically inspect the members, types, and access levels of a class or struct at compile-time?
 
 ## Theory & Reflection API
-- **`std::meta::nonstatic_data_members_of(info)`**: Returns a collection of meta-info objects representing all non-static fields (data members) of a class or struct. This includes members from all access specifiers (public, protected, private).
+- **`std::meta::nonstatic_data_members_of(info)`**: Returns a `std::vector<std::meta::info>` representing all non-static fields of a class. These collections are heap-allocated in this fork and must be processed within `consteval` contexts.
 - **`std::meta::type_of(info)`**: When called on a member's meta-info, it returns the meta-info representing that member's type.
 - **Access Specifiers**:
     - `std::meta::is_public(info)`
     - `std::meta::is_protected(info)`
     - `std::meta::is_private(info)`
-    These functions return a `bool` and can be used to filter members or generate access-aware reports.
+    These functions return a `bool` and can be used to filter members.
 
 ## Core Code Walkthrough
 - **Reflecting on Class Members**:
-    - `constexpr auto fields = std::meta::nonstatic_data_members_of(^Person);` retrieves all data members.
-    - `constexpr std::meta::info type_info = std::meta::type_of(f);` is nested reflection — we reflect on the member to get its type's reflection.
+    - `constexpr auto fields = std::meta::nonstatic_data_members_of(^^Person);` retrieves all data members as a vector.
+
+    - `constexpr std::meta::info type_info = std::meta::type_of(fields[I]);` demonstrates index-based metadata extraction.
 - **Access Level Querying**:
-    - `std::meta::is_private(fields[3])` is a powerful tool. Previously, checking member access required complex compiler-specific traits or was impossible.
+    - `std::meta::is_private(fields[3])` allows determining visibility programmatically at compile-time.
 
 ## Expected Output Description
 Running the code should show the layout of the `Person` struct:

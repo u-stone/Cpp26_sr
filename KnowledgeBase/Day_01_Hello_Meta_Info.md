@@ -10,7 +10,8 @@
     - `std::meta::display_string_of(info)`: Returns a `std::string_view` of the entity's name (works for built-in types).
     - `std::meta::identifier_of(info)`: Returns the identifier (works for declarations like members).
     - `std::meta::is_type(info)`: Returns `true` if the reflected entity is a type.
-- **Immediate Functions (`consteval`)**: Many reflection functions are `consteval` and return `std::vector<info>`, which is heap-allocated and cannot be stored in long-lived `constexpr` variables in this fork.
+- **Immediate Functions (`consteval`)**: Many reflection functions are `consteval` and return `std::vector<info>`, which is heap-allocated and cannot be stored in long-lived `constexpr` variables in this fork. These results should be processed within `consteval` contexts to avoid leaking metadata into runtime variables.
+- **Index-based Extraction**: Since reflection collections are vectors, they are indexed using `[i]`. This is often used with `std::index_sequence` for expansion.
 
 ## Core Code Walkthrough
 - `constexpr std::meta::info int_info = ^^int;`: The compiler creates a meta-information handle for the built-in `int` type.
@@ -20,14 +21,13 @@
 When run, the program should print the names of the reflected types and confirm that all compile-time checks passed:
 ```
 --- Day 01: Hello Meta-Info ---
-Reflecting on built-in type: int
-Reflecting on custom struct: MyAwesomeStruct
-Verification: All static_asserts passed!
+Member 0: id
+Member 1: value
 ```
 
 ## Pitfalls & Retrospective
 - **Header Selection**: In the Bloomberg fork, reflection functions are in the `<experimental/meta>` header (following P2996 naming), not the standard C++ `<meta>`.
-- **Zero Evaluation**: Remember that `^T` does not instantiate `T` or perform any runtime actions. It is purely a compile-time construct.
+- **Zero Evaluation**: Remember that `^^T` does not instantiate `T` or perform any runtime actions. It is purely a compile-time construct.
 
 ## Connections to Prior Knowledge
 - This replaces the old `typeid(T).name()` which was runtime-based, implementation-defined (mangled names), and not `constexpr` friendly.

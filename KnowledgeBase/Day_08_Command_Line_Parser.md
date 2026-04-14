@@ -5,7 +5,7 @@
 
 ## Theory & Reflection API
 - **Dynamic Mapping**: By reflecting on a struct's members, we can create a dynamic map between strings (CLI flags) and actual variables.
-- **`std::meta::name_of` in runtime loops**: While reflection is compile-time, we can use the results (like field names) in runtime logic (like comparing with `argv`).
+- **`std::meta::identifier_of` in runtime loops**: While reflection is compile-time, we can use the results (like field names) in runtime logic (like comparing with `argv`).
 - **Splicing for Assignment**: `obj.[: f :] = value` allows us to write to any field of any struct dynamically, as long as we have its meta-info.
 
 ## Core Code Walkthrough

@@ -4,15 +4,16 @@
 > How can we combine reflection queries, member splicing, and recursion to create a universal serializer for any C++ struct?
 
 ## Theory & Reflection API
-- **The "Killer Feature" of Reflection**: This is the culmination of all previous lessons. A generic serializer demonstrates why P2996 is transformative for C++.
-- **Accessing field values dynamically**: We use the member splice operator `obj.[: field_info :]` within a loop to access each field's value of an instance without knowing the field names at compile-time.
-- **Type-aware Formatting**: By reflecting on each field's type, we can decide how to format its value (e.g., adding quotes for strings, formatting bools as "true"/"false").
+- **Universal Serializer**: A generic serializer demonstrates why P2996 is transformative for C++.
+- **Member Splice Loop**: We use `obj.[: fields[i] :]` within a loop to access each field's value.
+- **Consteval Processing**: Because collections like `std::vector<info>` from `nonstatic_data_members_of` are heap-allocated, the serialization logic must handle them within `consteval` contexts for metadata extraction.
 
 ## Core Code Walkthrough
 - **Generic `to_json<T>`**:
-    - `constexpr auto fields = std::meta::nonstatic_data_members_of(^T);` gets all the metadata for fields in struct `T`.
-    - `for (size_t i = 0; i < fields.size(); ++i)` iterates through the metadata.
-    - `obj.[: fields[i] :]` is the magic: it tells the compiler to access the field on the `obj` instance that corresponds to the metadata `fields[i]`.
+    - `constexpr auto fields = std::meta::nonstatic_data_members_of(^^T);` gets all the metadata for fields in struct `T`.
+
+    - `for (size_t i = 0; i < fields.size(); ++i)` iterates through the metadata vector.
+    - `obj.[: fields[i] :]` accesses the field on the `obj` instance using its meta-info.
 - **Handling recursion**:
     - By combining reflection with `if constexpr` and template recursion, we can automatically handle nested structs (like `Address` inside `User`).
 

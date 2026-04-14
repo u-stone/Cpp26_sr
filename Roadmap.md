@@ -8,12 +8,12 @@
 *Goal: Understand how to obtain meta-information and query simple properties.*
 
 - **[CORE] Day 01: Hello Meta-Info**
-    - **Topic**: Setup environment, use the reflection operator `^`, and extract basic `std::meta::info`.
-    - **Core concepts**: `^T`, `std::meta::info`, `std::meta::name_of`.
+    - **Topic**: Setup environment, use the reflection operator `^^`, and extract basic `std::meta::info`.
+    - **Core concepts**: `^^T`, `std::meta::info`, `std::meta::display_string_of`.
 
 - **[CORE] Day 02: Reflecting Enums**
     - **Topic**: Extract enumerators, convert enum values to strings, and iterate over all values.
-    - **Core concepts**: `std::meta::enumerators_of`, iteration over `std::vector<std::meta::info>`.
+    - **Core concepts**: `std::meta::enumerators_of`, `std::meta::identifier_of`.
 
 ---
 
@@ -22,7 +22,7 @@
 
 - **[CORE] Day 03: Reflecting Structs/Classes**
     - **Topic**: Extract data members, iterate over fields, and check access specifiers.
-    - **Core concepts**: `std::meta::nonstatic_data_members_of`, `std::meta::is_public`.
+    - **Core concepts**: `std::meta::nonstatic_data_members_of`, `std::meta::is_public`, `std::meta::access_context`.
 
 - **Day 04: Attributes and Functions**
     - **Topic**: Querying C++ attributes (`[[...]]`) and member functions.
@@ -39,7 +39,7 @@
 
 - **Day 06: Tuple Generation**
     - **Topic**: Creating a custom struct or `std::tuple` dynamically from a list of reflected types.
-    - **Core concepts**: Parameter pack expansion with reflection, `std::meta::substitute`.
+    - **Core concepts**: Template instantiation with reflection, `std::meta::substitute`.
 
 ---
 
@@ -47,9 +47,9 @@
 *Goal: Build real-world utilities using reflection.*
 
 - **[CORE] Day 07: JSON Serializer**
-    - **Topic**: Implement a generic `to_json` function that works for any struct.
-    - **Core concepts**: Recursive reflection-based serialization.
+    - **Topic**: Implement a generic `to_json` function that works for any struct using index-based expansion.
+    - **Core concepts**: Recursive reflection-based serialization, `std::index_sequence`.
 
 - **Day 08: Command Line Parser**
     - **Topic**: Automatically map struct fields to CLI arguments.
-    - **Core concepts**: Integrating reflection with `std::format` and CLI logic.
+    - **Core concepts**: Mapping runtime strings to reflected member metadata.

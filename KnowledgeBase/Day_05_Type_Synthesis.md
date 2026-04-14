@@ -4,21 +4,20 @@
 > How can we turn meta-information (`std::meta::info`) back into actual C++ types and expressions?
 
 ## Theory & Reflection API
-- **The Splice Operator (`[: :]`)**: This is the inverse of the reflection operator (`^`). It "splices" metadata back into the source code at compile-time.
-- **Type Splicing**: When `m` reflects a type, `[: m :]` can be used anywhere a type-name is allowed (e.g., variable declarations, template arguments).
+- **The Splice Operator (`[: :]`)**: This is the inverse of the reflection operator (`^^`). It "splices" metadata back into the source code at compile-time.
+- **Type Splicing**: When `m` reflects a type, `[: m :]` can be used anywhere a type-name is allowed.
 - **Expression Splicing**: When `m` reflects a value or a member, `[: m :]` can be used in an expression.
-    - **Member Access**: `instance.[: m :]` allows accessing a data member or calling a member function reflected by `m`.
-- **Compile-time Guarantee**: The content inside `[: :]` must be a constant expression of type `std::meta::info`.
+- **Consteval Contexts**: Results from reflection queries (like `std::vector<info>`) are heap-allocated and must be processed within `consteval` contexts to ensure validity during splicing.
 
 ## Core Code Walkthrough
 - **Creating types**:
     ```cpp
-    constexpr std::meta::info t = ^int;
+    constexpr std::meta::info t = ^^int;
     [: t :] x = 5; // Compiler sees 'int x = 5;'
     ```
 - **Accessing members**:
     ```cpp
-    constexpr std::meta::info field = std::meta::nonstatic_data_members_of(^S)[0];
+    constexpr std::meta::info field = std::meta::nonstatic_data_members_of(^^S)[0];
     S instance;
     instance.[: field :] = 10; // Compiler sees 'instance.member_name = 10;'
     ```
